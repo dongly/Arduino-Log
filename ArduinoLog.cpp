@@ -31,11 +31,13 @@ SOFTWARE.
 
 #include "ArduinoLog.h"
 
-void Logging::begin(int level, Print* logOutput, bool showLevel)
+void Logging::begin(int level, Print* logOutput, bool showLevel,
+                    bool logColorEnable = false)
 {
     _level = constrain(level, LOG_LEVEL_SILENT, LOG_LEVEL_VERBOSE);
     _showLevel = showLevel;
     _logOutput = logOutput;
+    _logColorEnable = logColorEnable;
 }
 
 void Logging::setPrefix(printfunction f)

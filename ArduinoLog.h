@@ -38,24 +38,24 @@ typedef void (*printfunction)(Print*);
 #define LOG_LEVEL_TRACE 5
 #define LOG_LEVEL_VERBOSE 6
 
-#define LOG_COLOR_BLACK "30"
-#define LOG_COLOR_RED "31"
-#define LOG_COLOR_GREEN "32"
-#define LOG_COLOR_BROWN "33"
-#define LOG_COLOR_BLUE "34"
-#define LOG_COLOR_PURPLE "35"
-#define LOG_COLOR_CYAN "36"
-#define LOG_COLOR(COLOR) "\033[0;" COLOR "m"
-#define LOG_BOLD(COLOR) "\033[1;" COLOR "m"
-#define LOG_RESET_COLOR "\033[0m"
+#define _LOG_COLOR_BLACK "30"
+#define _LOG_COLOR_RED "31"
+#define _LOG_COLOR_GREEN "32"
+#define _LOG_COLOR_BROWN "33"
+#define _LOG_COLOR_BLUE "34"
+#define _LOG_COLOR_PURPLE "35"
+#define _LOG_COLOR_CYAN "36"
+#define _LOG_COLOR(COLOR) "\033[0;" COLOR "m"
+#define _LOG_BOLD(COLOR) "\033[1;" COLOR "m"
+#define _LOG_RESET_COLOR "\033[0m"
 
-#define LOG_COLOR_SILENT
-#define LOG_COLOR_FATAL LOG_BOLD(LOG_COLOR_RED)
-#define LOG_COLOR_ERROR LOG_COLOR(LOG_COLOR_RED)
-#define LOG_COLOR_WARNING LOG_COLOR(LOG_COLOR_BROWN)
-#define LOG_COLOR_NOTICE LOG_COLOR(LOG_COLOR_GREEN)
-#define LOG_COLOR_TRACE
-#define LOG_COLOR_VERBOSE
+#define LOG_COLOR_SILENT ""
+#define LOG_COLOR_FATAL _LOG_BOLD(_LOG_COLOR_RED)
+#define LOG_COLOR_ERROR _LOG_COLOR(_LOG_COLOR_RED)
+#define LOG_COLOR_WARNING _LOG_COLOR(_LOG_COLOR_BROWN)
+#define LOG_COLOR_NOTICE _LOG_COLOR(_LOG_COLOR_GREEN)
+#define LOG_COLOR_TRACE ""
+#define LOG_COLOR_VERBOSE ""
 
 #define CR "\n"
 #define LOGGING_VERSION 1_0_0
@@ -100,7 +100,7 @@ class Logging {
 private:
     int _level;
     bool _showLevel;
-    bool _logColor;
+    bool _logColorEnable;
     Print* _logOutput;
 
 public:
@@ -111,7 +111,7 @@ public:
         : _level(LOG_LEVEL_SILENT)
         , _showLevel(true)
         , _logOutput(NULL)
-        , _logColor(false)
+        , _logColorEnable(true)
     {
     }
 
@@ -124,7 +124,8 @@ public:
     * \return void
     *
     */
-    void begin(int level, Print* output, bool showLevel = true);
+    void begin(int level, Print* output, bool showLevel = true, 
+               bool logColorEnable = false);
 
     /**
 	 * Sets a function to be called before each log command.
@@ -151,7 +152,7 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_FATAL, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
 
     /**
@@ -169,7 +170,7 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_ERROR, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
     /**
 	* Output a warning message. Output message contains
@@ -187,7 +188,7 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_WARNING, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
     /**
 	* Output a notice message. Output message contains
@@ -205,7 +206,7 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_NOTICE, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
     /**
 	* Output a trace message. Output message contains
@@ -222,7 +223,7 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_TRACE, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
 
     /**
@@ -240,12 +241,13 @@ public:
     {
 #ifndef DISABLE_LOGGING
         printLevel(LOG_LEVEL_VERBOSE, msg, args...);
-#endif
+#endif //DISABLE_LOGGING
     }
 
 private:
-    void logShowColor(level)
+    void logShowColor(int level)
     {
+#ifndef DISABLE_LOGGING
         const char* colorStr[] = {
             LOG_COLOR_SILENT,
             LOG_COLOR_FATAL,
@@ -256,6 +258,7 @@ private:
             LOG_COLOR_VERBOSE
         };
         _logOutput->print(colorStr[level]);
+#endif //DISABLE_LOGGING
     }
 
     void print(const char* format, va_list args);
@@ -269,7 +272,7 @@ private:
     {
 #ifndef DISABLE_LOGGING
         if (level <= _level) {
-            if (_logColor) {
+            if (_logColorEnable) {
                 logShowColor(level);
             }
             if (_prefix != NULL) {
@@ -286,11 +289,11 @@ private:
             if (_suffix != NULL) {
                 _suffix(_logOutput);
             }
-            if (_logColor) { //reset color
-                _logOutput->print(""\033[0m"");
+            if (_logColorEnable) { //reset color
+                _logOutput->print(_LOG_RESET_COLOR);
             }
         }
-#endif
+#endif //DISABLE_LOGGING
     }
 };
 
