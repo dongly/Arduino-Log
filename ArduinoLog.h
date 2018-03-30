@@ -17,9 +17,9 @@ Licensed under the MIT License <http://opensource.org/licenses/MIT>.
 #include <inttypes.h>
 #include <stdarg.h>
 #if defined(ARDUINO) && ARDUINO >= 100
-	#include "Arduino.h"
+#include "Arduino.h"
 #else
-	#include "WProgram.h"
+#include "WProgram.h"
 #endif
 typedef void (*printfunction)(Print*);
 
@@ -30,14 +30,32 @@ typedef void (*printfunction)(Print*);
 // ************************************************************************
 //#define DISABLE_LOGGING
 
-
-#define LOG_LEVEL_SILENT  0
-#define LOG_LEVEL_FATAL   1
-#define LOG_LEVEL_ERROR   2
+#define LOG_LEVEL_SILENT 0
+#define LOG_LEVEL_FATAL 1
+#define LOG_LEVEL_ERROR 2
 #define LOG_LEVEL_WARNING 3
-#define LOG_LEVEL_NOTICE  4
-#define LOG_LEVEL_TRACE   5
+#define LOG_LEVEL_NOTICE 4
+#define LOG_LEVEL_TRACE 5
 #define LOG_LEVEL_VERBOSE 6
+
+#define LOG_COLOR_BLACK "30"
+#define LOG_COLOR_RED "31"
+#define LOG_COLOR_GREEN "32"
+#define LOG_COLOR_BROWN "33"
+#define LOG_COLOR_BLUE "34"
+#define LOG_COLOR_PURPLE "35"
+#define LOG_COLOR_CYAN "36"
+#define LOG_COLOR(COLOR) "\033[0;" COLOR "m"
+#define LOG_BOLD(COLOR) "\033[1;" COLOR "m"
+#define LOG_RESET_COLOR "\033[0m"
+
+#define LOG_COLOR_SILENT
+#define LOG_COLOR_FATAL LOG_BOLD(LOG_COLOR_RED)
+#define LOG_COLOR_ERROR LOG_COLOR(LOG_COLOR_RED)
+#define LOG_COLOR_WARNING LOG_COLOR(LOG_COLOR_BROWN)
+#define LOG_COLOR_NOTICE LOG_COLOR(LOG_COLOR_GREEN)
+#define LOG_COLOR_TRACE
+#define LOG_COLOR_VERBOSE
 
 #define CR "\n"
 #define LOGGING_VERSION 1_0_0
@@ -81,17 +99,21 @@ typedef void (*printfunction)(Print*);
 class Logging {
 private:
     int _level;
-	bool _showLevel;
+    bool _showLevel;
+    bool _logColor;
     Print* _logOutput;
+
 public:
     /*!
 	 * default Constructor
 	 */
     Logging()
-      : _level(LOG_LEVEL_SILENT),
-	    _showLevel(true),
-        _logOutput(NULL) {}
-
+        : _level(LOG_LEVEL_SILENT)
+        , _showLevel(true)
+        , _logOutput(NULL)
+        , _logColor(false)
+    {
+    }
 
     /**
     * Initializing, must be called as first. Note that if you use
@@ -102,19 +124,19 @@ public:
     * \return void
     *
     */
-    void begin(int level, Print *output, bool showLevel = true);
+    void begin(int level, Print* output, bool showLevel = true);
 
-	/**
+    /**
 	 * Sets a function to be called before each log command.
 	 */
-	void setPrefix(printfunction);
+    void setPrefix(printfunction);
 
-	/**
+    /**
 	 * Sets a function to be called after each log command.
 	 */
-	void setSuffix(printfunction);
+    void setSuffix(printfunction);
 
-	    /**
+    /**
 	* Output a fatal error message. Output message contains
 	* F: followed by original message
 	* Fatal error messages are printed out at
@@ -124,11 +146,13 @@ public:
 	* \param ... any number of variables
 	* \return void
 	*/
-  template <class T, typename... Args> void fatal(T msg, Args... args){
+    template <class T, typename... Args>
+    void fatal(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_FATAL, msg, args...);
+        printLevel(LOG_LEVEL_FATAL, msg, args...);
 #endif
-  }
+    }
 
     /**
 	* Output an error message. Output message contains
@@ -139,12 +163,14 @@ public:
 	* \param msg format string to output
 	* \param ... any number of variables
 	* \return void
-	*/
-  template <class T, typename... Args> void error(T msg, Args... args){
+	 */
+    template <class T, typename... Args>
+    void error(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_ERROR, msg, args...);
+        printLevel(LOG_LEVEL_ERROR, msg, args...);
 #endif
-  }
+    }
     /**
 	* Output a warning message. Output message contains
 	* W: followed by original message
@@ -156,11 +182,13 @@ public:
 	* \return void
 	*/
 
-  template <class T, typename... Args> void warning(T msg, Args...args){
+    template <class T, typename... Args>
+    void warning(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_WARNING, msg, args...);
+        printLevel(LOG_LEVEL_WARNING, msg, args...);
 #endif
-  }
+    }
     /**
 	* Output a notice message. Output message contains
 	* N: followed by original message
@@ -172,11 +200,13 @@ public:
 	* \return void
 	*/
 
-  template <class T, typename... Args> void notice(T msg, Args...args){
+    template <class T, typename... Args>
+    void notice(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_NOTICE, msg, args...);
+        printLevel(LOG_LEVEL_NOTICE, msg, args...);
 #endif
-  }
+    }
     /**
 	* Output a trace message. Output message contains
 	* N: followed by original message
@@ -187,11 +217,13 @@ public:
 	* \param ... any number of variables
 	* \return void
 	*/
-  template <class T, typename... Args> void trace(T msg, Args... args){
+    template <class T, typename... Args>
+    void trace(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_TRACE, msg, args...);
+        printLevel(LOG_LEVEL_TRACE, msg, args...);
 #endif
-  }
+    }
 
     /**
 	* Output a verbose message. Output message contains
@@ -203,36 +235,64 @@ public:
 	* \param ... any number of variables
 	* \return void
 	*/
-  template <class T, typename... Args> void verbose(T msg, Args... args){
+    template <class T, typename... Args>
+    void verbose(T msg, Args... args)
+    {
 #ifndef DISABLE_LOGGING
-    printLevel(LOG_LEVEL_VERBOSE, msg, args...);
+        printLevel(LOG_LEVEL_VERBOSE, msg, args...);
 #endif
-  }
+    }
 
 private:
-    void print(const char *format, va_list args);
-    void print(const __FlashStringHelper *format, va_list args);
-    void printFormat(const char format, va_list *args);
+    void logShowColor(level)
+    {
+        const char* colorStr[] = {
+            LOG_COLOR_SILENT,
+            LOG_COLOR_FATAL,
+            LOG_COLOR_ERROR,
+            LOG_COLOR_WARNING,
+            LOG_COLOR_NOTICE,
+            LOG_COLOR_TRACE,
+            LOG_COLOR_VERBOSE
+        };
+        _logOutput->print(colorStr[level]);
+    }
+
+    void print(const char* format, va_list args);
+    void print(const __FlashStringHelper* format, va_list args);
+    void printFormat(const char format, va_list* args);
     printfunction _prefix = NULL;
     printfunction _suffix = NULL;
-    template <class T> void printLevel(int level, T msg, ...){
+
+    template <class T>
+    void printLevel(int level, T msg, ...)
+    {
 #ifndef DISABLE_LOGGING
-      if (level <= _level) {
-        if(_prefix != NULL) _prefix(_logOutput);
-        if (_showLevel) {
-          char levels[] = "FEWNTV";
-          _logOutput->print(levels[level - 1]);
-          _logOutput->print(": ");
+        if (level <= _level) {
+            if (_logColor) {
+                logShowColor(level);
+            }
+            if (_prefix != NULL) {
+                _prefix(_logOutput);
+            }
+            if (_showLevel) {
+                char levels[] = "FEWNTV";
+                _logOutput->print(levels[level - 1]);
+                _logOutput->print(": ");
+            }
+            va_list args;
+            va_start(args, msg);
+            print(msg, args);
+            if (_suffix != NULL) {
+                _suffix(_logOutput);
+            }
+            if (_logColor) { //reset color
+                _logOutput->print(""\033[0m"");
+            }
         }
-        va_list args;
-        va_start(args, msg);
-        print(msg,args);
-        if(_suffix != NULL) _suffix(_logOutput);
-      }
 #endif
     }
 };
 
 extern Logging Log;
 #endif
-
