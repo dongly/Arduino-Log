@@ -30,12 +30,12 @@ typedef void (*printfunction)(Print*);
 // ************************************************************************
 //#define DISABLE_LOGGING
 
-#define LOG_LEVEL_SILENT 0
-#define LOG_LEVEL_FATAL 1
-#define LOG_LEVEL_ERROR 2
+#define LOG_LEVEL_SILENT  0
+#define LOG_LEVEL_FATAL   1
+#define LOG_LEVEL_ERROR   2
 #define LOG_LEVEL_WARNING 3
-#define LOG_LEVEL_NOTICE 4
-#define LOG_LEVEL_TRACE 5
+#define LOG_LEVEL_NOTICE  4
+#define LOG_LEVEL_TRACE   5
 #define LOG_LEVEL_VERBOSE 6
 
 #define _LOG_COLOR_BLACK "30"
@@ -139,7 +139,7 @@ public:
 
     /**
 	* Output a fatal error message. Output message contains
-	* F: followed by original message
+	* FATAL: followed by original message
 	* Fatal error messages are printed out at
 	* loglevels >= LOG_LEVEL_FATAL
 	*
@@ -157,7 +157,7 @@ public:
 
     /**
 	* Output an error message. Output message contains
-	* E: followed by original message
+	* ERROR: followed by original message
 	* Error messages are printed out at
 	* loglevels >= LOG_LEVEL_ERROR
 	*
@@ -174,7 +174,7 @@ public:
     }
     /**
 	* Output a warning message. Output message contains
-	* W: followed by original message
+	* WARNING: followed by original message
 	* Warning messages are printed out at
 	* loglevels >= LOG_LEVEL_WARNING
 	*
@@ -192,7 +192,7 @@ public:
     }
     /**
 	* Output a notice message. Output message contains
-	* N: followed by original message
+	* NOTICE: followed by original message
 	* Notice messages are printed out at
 	* loglevels >= LOG_LEVEL_NOTICE
 	*
@@ -210,7 +210,7 @@ public:
     }
     /**
 	* Output a trace message. Output message contains
-	* N: followed by original message
+	* TRACE: followed by original message
 	* Trace messages are printed out at
 	* loglevels >= LOG_LEVEL_TRACE
 	*
@@ -228,7 +228,7 @@ public:
 
     /**
 	* Output a verbose message. Output message contains
-	* V: followed by original message
+	* VERBOSE: followed by original message
 	* Debug messages are printed out at
 	* loglevels >= LOG_LEVEL_VERBOSE
 	*
@@ -266,7 +266,7 @@ private:
     void printFormat(const char format, va_list* args);
     printfunction _prefix = NULL;
     printfunction _suffix = NULL;
-
+    
     template <class T>
     void printLevel(int level, T msg, ...)
     {
@@ -279,7 +279,14 @@ private:
                 _prefix(_logOutput);
             }
             if (_showLevel) {
-                char levels[] = "FEWNTV";
+                const char* levels[] = {
+                    "FATAL",
+                    "ERROR",
+                    "WARNING",
+                    "NOTICE",
+                    "TRACE",
+                    "VERBOSE"
+                };
                 _logOutput->print(levels[level - 1]);
                 _logOutput->print(": ");
             }
