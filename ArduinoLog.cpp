@@ -32,7 +32,7 @@ SOFTWARE.
 #include "ArduinoLog.h"
 
 void Logging::begin(int level, Print* logOutput, bool showLevel,
-                    bool logColorEnable = false)
+    bool logColorEnable)
 {
     _level = constrain(level, LOG_LEVEL_SILENT, LOG_LEVEL_VERBOSE);
     _showLevel = showLevel;
